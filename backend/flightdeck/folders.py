@@ -8,7 +8,11 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 _lock = threading.Lock()
+router = APIRouter(prefix="/api/folders")
 
 
 class DuplicateFolderError(Exception):
@@ -59,3 +63,20 @@ def add_folder(path: str) -> dict[str, str]:
         data["folders"] = [*items, folder]
         _save(data)
     return folder
+
+
+class FolderIn(BaseModel):
+    path: str
+
+
+@router.get("")
+def get_folders() -> list[dict[str, str]]:
+    return list_folders()
+
+
+@router.post("", status_code=201)
+def post_folder(body: FolderIn) -> dict[str, str]:
+    try:
+        return add_folder(body.path)
+    except DuplicateFolderError:
+        raise HTTPException(status_code=409, detail="Folder already watched") from None

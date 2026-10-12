@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
 from flightdeck import folders
+from flightdeck.main import app
 
 
 @pytest.fixture(autouse=True)
@@ -43,3 +45,31 @@ def test_default_config_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.delenv("FLIGHTDECK_CONFIG")
     monkeypatch.setenv("HOME", str(tmp_path))
     assert folders.config_path() == tmp_path / ".config" / "flightdeck" / "config.json"
+
+
+def test_post_then_list(config_file: Path) -> None:
+    client = TestClient(app)
+    assert client.get("/api/folders").json() == []
+    assert not config_file.exists()
+    res = client.post("/api/folders", json={"path": "/a/b/"})
+    assert res.status_code == 201
+    body = res.json()
+    assert body["path"] == "/a/b"
+    assert body["id"]
+    assert client.get("/api/folders").json() == [body]
+    assert config_file.exists()
+    assert body["path"] in config_file.read_text()
+
+
+@pytest.mark.parametrize("dup", ["/a/b/", "/a/./b", "/a/c/../b"])
+def test_post_duplicate_returns_409(dup: str) -> None:
+    client = TestClient(app)
+    first = client.post("/api/folders", json={"path": "/a/b"}).json()
+    res = client.post("/api/folders", json={"path": dup})
+    assert res.status_code == 409
+    assert client.get("/api/folders").json() == [first]
+
+
+def test_api_persists_across_restart() -> None:
+    created = TestClient(app).post("/api/folders", json={"path": "/a/b"}).json()
+    assert TestClient(app).get("/api/folders").json() == [created]
