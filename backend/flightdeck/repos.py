@@ -2,12 +2,13 @@
 
 import hashlib
 import os
+import threading
 from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter
 
-from flightdeck.folders import list_folders
+from flightdeck.folders import config_path, folders_version, list_folders
 from flightdeck.scanner import HarnessRepo, scan_folder
 
 router = APIRouter(prefix="/api/repos")
@@ -68,6 +69,25 @@ def scan_all() -> dict[str, Any]:
     return {"repos": repos, "scan_warnings": warnings}
 
 
+_cache_lock = threading.Lock()
+_cache: tuple[tuple[str, int], dict[str, Any]] | None = None
+
+
+def _cached_scan(force: bool = False) -> dict[str, Any]:
+    """Serve the cached scan unless forced or the watched folders changed."""
+    global _cache
+    with _cache_lock:
+        key = (str(config_path()), folders_version())
+        if force or _cache is None or _cache[0] != key:
+            _cache = (key, scan_all())
+        return _cache[1]
+
+
 @router.get("")
 def get_repos() -> dict[str, Any]:
-    return scan_all()
+    return _cached_scan()
+
+
+@router.post("/rescan")
+def rescan_repos() -> dict[str, Any]:
+    return _cached_scan(force=True)

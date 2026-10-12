@@ -100,3 +100,30 @@ def test_unreadable_subdir_reported_not_fatal(
     assert len(body["repos"]) == 1
     assert len(body["scan_warnings"]) == 1
     assert "bad" in body["scan_warnings"][0]
+
+
+def test_cached_until_rescan(tmp_path: Path) -> None:
+    watched = tmp_path / "w"
+    _repo(watched, "a")
+    folders.add_folder(str(watched))
+    first = client.get("/api/repos").json()
+    assert len(first["repos"]) == 1
+    _repo(watched, "b")
+    assert client.get("/api/repos").json() == first
+    resp = client.post("/api/repos/rescan")
+    assert resp.status_code == 200
+    assert len(resp.json()["repos"]) == 2
+    assert client.get("/api/repos").json() == resp.json()
+
+
+def test_add_and_remove_folder_invalidate_cache(tmp_path: Path) -> None:
+    one = tmp_path / "one"
+    two = tmp_path / "two"
+    _repo(one, "a")
+    _repo(two, "b")
+    folders.add_folder(str(one))
+    assert len(client.get("/api/repos").json()["repos"]) == 1
+    added = folders.add_folder(str(two))
+    assert len(client.get("/api/repos").json()["repos"]) == 2
+    folders.remove_folder(added["id"])
+    assert len(client.get("/api/repos").json()["repos"]) == 1

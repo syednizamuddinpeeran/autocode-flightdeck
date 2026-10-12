@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from flightdeck.paths import InvalidPathError, validate_folder_path
 
 _lock = threading.Lock()
+_version = 0
 router = APIRouter(prefix="/api/folders")
 
 
@@ -53,6 +54,16 @@ def _save(data: dict[str, Any]) -> None:
         raise
 
 
+def _bump() -> None:
+    global _version
+    _version += 1
+
+
+def folders_version() -> int:
+    """Counter bumped whenever the watched folders change (cache invalidation)."""
+    return _version
+
+
 def list_folders() -> list[dict[str, str]]:
     folders: list[dict[str, str]] = _load().get("folders", [])
     return folders
@@ -68,6 +79,7 @@ def add_folder(path: str) -> dict[str, str]:
         folder = {"id": uuid.uuid4().hex, "path": normalised}
         data["folders"] = [*items, folder]
         _save(data)
+        _bump()
     return folder
 
 
@@ -80,6 +92,7 @@ def remove_folder(folder_id: str) -> None:
             raise FolderNotFoundError(folder_id)
         data["folders"] = remaining
         _save(data)
+        _bump()
 
 
 class FolderIn(BaseModel):
