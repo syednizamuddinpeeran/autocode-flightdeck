@@ -73,3 +73,24 @@ def test_post_duplicate_returns_409(dup: str) -> None:
 def test_api_persists_across_restart() -> None:
     created = TestClient(app).post("/api/folders", json={"path": "/a/b"}).json()
     assert TestClient(app).get("/api/folders").json() == [created]
+
+
+def test_store_remove() -> None:
+    keep = folders.add_folder("/a/keep")
+    gone = folders.add_folder("/a/gone")
+    folders.remove_folder(gone["id"])
+    assert folders.list_folders() == [keep]
+
+
+def test_store_remove_unknown() -> None:
+    added = folders.add_folder("/a/b")
+    with pytest.raises(folders.FolderNotFoundError):
+        folders.remove_folder("nope")
+    assert folders.list_folders() == [added]
+
+
+def test_store_remove_twice_raises() -> None:
+    added = folders.add_folder("/a/b")
+    folders.remove_folder(added["id"])
+    with pytest.raises(folders.FolderNotFoundError):
+        folders.remove_folder(added["id"])

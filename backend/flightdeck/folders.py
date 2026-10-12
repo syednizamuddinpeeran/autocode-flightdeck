@@ -19,6 +19,10 @@ class DuplicateFolderError(Exception):
     """Raised when a folder is already watched."""
 
 
+class FolderNotFoundError(Exception):
+    """Raised when a folder id is not watched."""
+
+
 def config_path() -> Path:
     env = os.environ.get("FLIGHTDECK_CONFIG")
     if env:
@@ -63,6 +67,17 @@ def add_folder(path: str) -> dict[str, str]:
         data["folders"] = [*items, folder]
         _save(data)
     return folder
+
+
+def remove_folder(folder_id: str) -> None:
+    with _lock:
+        data = _load()
+        items: list[dict[str, str]] = data.get("folders", [])
+        remaining = [item for item in items if item["id"] != folder_id]
+        if len(remaining) == len(items):
+            raise FolderNotFoundError(folder_id)
+        data["folders"] = remaining
+        _save(data)
 
 
 class FolderIn(BaseModel):
