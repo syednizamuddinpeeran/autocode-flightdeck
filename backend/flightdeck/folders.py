@@ -95,3 +95,11 @@ def post_folder(body: FolderIn) -> dict[str, str]:
         return add_folder(body.path)
     except DuplicateFolderError:
         raise HTTPException(status_code=409, detail="Folder already watched") from None
+
+
+@router.delete("/{folder_id}", status_code=204)
+def delete_folder(folder_id: str) -> None:
+    try:
+        remove_folder(folder_id)
+    except FolderNotFoundError:
+        raise HTTPException(status_code=404, detail="Folder not found") from None
