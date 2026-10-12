@@ -11,6 +11,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from flightdeck.paths import InvalidPathError, validate_folder_path
+
 _lock = threading.Lock()
 router = APIRouter(prefix="/api/folders")
 
@@ -92,7 +94,11 @@ def get_folders() -> list[dict[str, str]]:
 @router.post("", status_code=201)
 def post_folder(body: FolderIn) -> dict[str, str]:
     try:
-        return add_folder(body.path)
+        path = validate_folder_path(body.path)
+    except InvalidPathError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    try:
+        return add_folder(path)
     except DuplicateFolderError:
         raise HTTPException(status_code=409, detail="Folder already watched") from None
 
