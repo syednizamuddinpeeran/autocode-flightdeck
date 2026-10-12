@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from flightdeck.folders import router as folders_router
 from flightdeck.repos import router as repos_router
+from flightdeck.sessions import router as sessions_router
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
@@ -12,6 +13,7 @@ DEFAULT_PORT = 8000
 app = FastAPI(title="Flight deck")
 app.include_router(folders_router)
 app.include_router(repos_router)
+app.include_router(sessions_router)
 
 
 @app.get("/api/health")
