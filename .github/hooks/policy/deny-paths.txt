@@ -1,0 +1,27 @@
+# Extended regexes matched against file paths in edit/create/view tool arguments.
+# Prefix a line with "write:" to block only writes (edit/create); otherwise reads are blocked too.
+
+# Secrets: never read or write
+(^|/)\.env(\..*)?$
+id_rsa|id_ed25519|\.pem$|\.p12$|\.pfx$
+(^|/)\.ssh/
+\.aws/credentials
+(^|/)\.(npmrc|pypirc|netrc|git-credentials)$
+
+# Guardrails and pipelines: humans change these
+write:\.github/hooks/
+write:scripts/factory/check(-ready|-complexity|-breakdown)?\.(sh|ps1)
+write:scripts/factory/complexity\.env
+write:scripts/factory/(new-draft|create-issues?|create-tasks?|run-batch|agent-cli)\.(sh|ps1)
+write:scripts/factory/commands\.env
+write:\.agent-logs/
+write:\.git/
+# Repo-type rules are appended below.
+
+# ===== Repo type: github =====
+write:\.github/workflows/
+
+# ===== Assistant: claude-code =====
+# .claude/ holds the hook wiring (settings.json), agents and skills.
+write:\.claude/
+write:CLAUDE\.md$
