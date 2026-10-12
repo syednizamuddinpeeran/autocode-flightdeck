@@ -1,3 +1,5 @@
+.agent-logs/
+.agent-work/
 node_modules/
 dist/
 .venv/
