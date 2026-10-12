@@ -76,7 +76,7 @@ export default function Settings() {
   }
 
   return (
-    <section id="settings">
+    <section>
       <h2>Settings</h2>
       <form onSubmit={onAdd}>
         <label>
