@@ -12,12 +12,13 @@ def make_repo(
     git: str = "dir",
     check_sh: bool = False,
     logs: bool = False,
+    gitdir: str | None = None,
 ) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     if git == "dir":
         (path / ".git").mkdir()
     elif git == "file":
-        (path / ".git").write_text("gitdir: /elsewhere\n")
+        (path / ".git").write_text(f"gitdir: {gitdir or '/elsewhere'}\n")
     if check_sh:
         (path / "scripts" / "factory").mkdir(parents=True)
         (path / "scripts" / "factory" / "check.sh").write_text("#!/bin/bash\n")
@@ -96,3 +97,67 @@ def test_unreadable_dir_becomes_warning(tmp_path: Path, monkeypatch: pytest.Monk
     assert [r.path for r in result.repos] == [str(good)]
     assert len(result.warnings) == 1
     assert str(bad) in result.warnings[0]
+
+
+def test_worktree_grouped_under_parent(tmp_path: Path) -> None:
+    parent = make_repo(tmp_path / "proj", check_sh=True)
+    wt = make_repo(
+        tmp_path / "proj-worktrees" / "issue-1",
+        git="file",
+        check_sh=True,
+        gitdir=f"{parent}/.git/worktrees/issue-1",
+    )
+    result = scan_folder(str(tmp_path))
+    assert [r.path for r in result.repos] == [str(parent)]
+    assert result.repos[0].worktrees == (str(wt),)
+    assert result.warnings == []
+
+
+def test_relative_gitdir_worktree_grouped(tmp_path: Path) -> None:
+    parent = make_repo(tmp_path / "proj", check_sh=True)
+    wt = make_repo(
+        tmp_path / "proj-worktrees" / "issue-1",
+        git="file",
+        check_sh=True,
+        gitdir="../../proj/.git/worktrees/issue-1",
+    )
+    result = scan_folder(str(tmp_path))
+    assert [r.path for r in result.repos] == [str(parent)]
+    assert result.repos[0].worktrees == (str(wt),)
+    assert result.warnings == []
+
+
+def test_orphan_worktree_outside_root_listed_with_warning(tmp_path: Path) -> None:
+    watched = tmp_path / "watched"
+    wt = make_repo(
+        watched / "proj-worktrees" / "issue-1",
+        git="file",
+        check_sh=True,
+        gitdir=f"{tmp_path}/other/proj/.git/worktrees/issue-1",
+    )
+    result = scan_folder(str(watched))
+    assert [r.path for r in result.repos] == [str(wt)]
+    assert result.repos[0].worktrees == ()
+    assert len(result.warnings) == 1
+    assert str(wt) in result.warnings[0]
+
+
+def test_worktree_with_non_harness_parent_is_orphan(tmp_path: Path) -> None:
+    parent = make_repo(tmp_path / "proj")
+    wt = make_repo(
+        tmp_path / "proj-worktrees" / "issue-1",
+        git="file",
+        check_sh=True,
+        gitdir=f"{parent}/.git/worktrees/issue-1",
+    )
+    result = scan_folder(str(tmp_path))
+    assert [r.path for r in result.repos] == [str(wt)]
+    assert len(result.warnings) == 1
+    assert str(wt) in result.warnings[0]
+
+
+def test_non_worktree_gitdir_file_is_normal_repo_without_warning(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path / "a", git="file", logs=True)
+    result = scan_folder(str(tmp_path))
+    assert [r.path for r in result.repos] == [str(repo)]
+    assert result.warnings == []
