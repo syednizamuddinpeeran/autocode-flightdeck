@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from flightdeck.folders import router as folders_router
+from flightdeck.install import router as install_router
 from flightdeck.repos import router as repos_router
 
 DEFAULT_HOST = "127.0.0.1"
@@ -12,6 +13,7 @@ DEFAULT_PORT = 8000
 app = FastAPI(title="Flight deck")
 app.include_router(folders_router)
 app.include_router(repos_router)
+app.include_router(install_router)
 
 
 @app.get("/api/health")
