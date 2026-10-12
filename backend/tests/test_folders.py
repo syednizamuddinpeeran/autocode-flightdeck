@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -73,3 +74,57 @@ def test_post_duplicate_returns_409(dup: str) -> None:
 def test_api_persists_across_restart() -> None:
     created = TestClient(app).post("/api/folders", json={"path": "/a/b"}).json()
     assert TestClient(app).get("/api/folders").json() == [created]
+
+
+def test_store_remove() -> None:
+    keep = folders.add_folder("/a/keep")
+    gone = folders.add_folder("/a/gone")
+    folders.remove_folder(gone["id"])
+    assert folders.list_folders() == [keep]
+
+
+def test_store_remove_unknown() -> None:
+    added = folders.add_folder("/a/b")
+    with pytest.raises(folders.FolderNotFoundError):
+        folders.remove_folder("nope")
+    assert folders.list_folders() == [added]
+
+
+def test_store_remove_twice_raises() -> None:
+    added = folders.add_folder("/a/b")
+    folders.remove_folder(added["id"])
+    with pytest.raises(folders.FolderNotFoundError):
+        folders.remove_folder(added["id"])
+
+
+def test_tests_use_temp_config(config_file: Path, tmp_path: Path) -> None:
+    assert os.environ["FLIGHTDECK_CONFIG"] == str(config_file)
+    assert folders.config_path().is_relative_to(tmp_path)
+
+
+def test_delete_removes_and_persists(config_file: Path) -> None:
+    client = TestClient(app)
+    body = client.post("/api/folders", json={"path": "/a/b"}).json()
+    res = client.delete(f"/api/folders/{body['id']}")
+    assert res.status_code == 204
+    assert res.content == b""
+    assert client.get("/api/folders").json() == []
+    assert "/a/b" not in config_file.read_text()
+
+
+def test_delete_unknown_returns_404() -> None:
+    client = TestClient(app)
+    kept = client.post("/api/folders", json={"path": "/a/b"}).json()
+    res = client.delete("/api/folders/nope")
+    assert res.status_code == 404
+    assert res.json()["detail"]
+    assert client.get("/api/folders").json() == [kept]
+
+
+def test_delete_twice_returns_404() -> None:
+    client = TestClient(app)
+    body = client.post("/api/folders", json={"path": "/a/b"}).json()
+    assert client.delete(f"/api/folders/{body['id']}").status_code == 204
+    res = client.delete(f"/api/folders/{body['id']}")
+    assert res.status_code == 404
+    assert res.json()["detail"]
