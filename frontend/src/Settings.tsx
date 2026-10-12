@@ -59,6 +59,22 @@ export default function Settings() {
     }
   }
 
+  async function onRemove(id: string) {
+    setError(null);
+    try {
+      const res = await fetch(`/api/folders/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        setError(await readDetail(res));
+        return;
+      }
+      setFolders((prev) => prev.filter((f) => f.id !== id));
+    } catch {
+      setError(GENERIC_ERROR);
+    }
+  }
+
   return (
     <section>
       <h2>Settings</h2>
@@ -74,6 +90,9 @@ export default function Settings() {
         {folders.map((f) => (
           <li key={f.id}>
             <span>{f.path}</span>
+            <button type="button" onClick={() => onRemove(f.id)}>
+              Remove
+            </button>
           </li>
         ))}
       </ul>
