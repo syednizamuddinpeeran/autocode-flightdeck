@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GENERIC_ERROR, readDetail } from "./detail";
 
 interface Preview {
@@ -29,7 +29,13 @@ const LABELS: Record<keyof Options, string> = {
   cloud: "Cloud",
 };
 
+interface RepoItem {
+  id: string;
+  path: string;
+}
+
 export default function Install() {
+  const [repos, setRepos] = useState<RepoItem[]>([]);
   const [target, setTarget] = useState("");
   const [options, setOptions] = useState<Options>({
     repo: "github",
@@ -42,6 +48,29 @@ export default function Install() {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rescanned, setRescanned] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/repos");
+        const data: unknown = await res.json();
+        const list = (data as { repos?: unknown } | null)?.repos;
+        if (live && Array.isArray(list)) {
+          setRepos(
+            list.filter(
+              (r): r is RepoItem => typeof (r as RepoItem)?.path === "string",
+            ),
+          );
+        }
+      } catch {
+        // Picker is optional; the typed path still works.
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // Any input change invalidates the preview, so Confirm always matches it.
   function reset() {
@@ -97,6 +126,23 @@ export default function Install() {
   return (
     <section>
       <h2>Install harness</h2>
+      <label>
+        Discovered repo
+        <select
+          value={repos.some((r) => r.path === target) ? target : ""}
+          onChange={(e) => {
+            setTarget(e.target.value);
+            reset();
+          }}
+        >
+          <option value="">(type a path below)</option>
+          {repos.map((r) => (
+            <option key={r.id} value={r.path}>
+              {r.path}
+            </option>
+          ))}
+        </select>
+      </label>
       <label>
         Target folder
         <input
