@@ -1,4 +1,5 @@
 import Settings from "./Settings";
+import SessionTimelineSection from "./SessionTimeline";
 import Trends from "./Trends";
 
 export default function App() {
@@ -7,6 +8,7 @@ export default function App() {
       <h1>Flight deck</h1>
       <Settings />
       <Trends />
+      <SessionTimelineSection />
     </>
   );
 }
