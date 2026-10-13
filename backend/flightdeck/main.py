@@ -8,6 +8,7 @@ from flightdeck.harness import router as harness_router
 from flightdeck.install import router as install_router
 from flightdeck.repos import router as repos_router
 from flightdeck.runs import router as runs_router
+from flightdeck.sessions import router as sessions_router
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
@@ -18,6 +19,7 @@ app.include_router(repos_router)
 app.include_router(harness_router)
 app.include_router(install_router)
 app.include_router(runs_router)
+app.include_router(sessions_router)
 
 
 @app.get("/api/health")
