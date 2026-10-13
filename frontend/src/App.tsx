@@ -1,4 +1,5 @@
 import Guard from "./Guard";
+import Harness from "./Harness";
 import Sessions from "./Sessions";
 import Settings from "./Settings";
 import SessionTimelineSection from "./SessionTimeline";
@@ -10,6 +11,7 @@ export default function App() {
       <Sessions />
       <Guard />
       <Settings />
+      <Harness />
       <SessionTimelineSection />
     </>
   );
