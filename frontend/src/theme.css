@@ -1,0 +1,58 @@
+/* Design tokens. Theme is selected by data-theme on <html>. */
+:root {
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --radius: 6px;
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  /* Default colours (light) */
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #4a4a4a;
+  --color-border: #c8c8c8;
+  --color-accent: #0b57d0;
+  --color-on-accent: #ffffff;
+  --color-success: #1b6e2d;
+  --color-on-success: #ffffff;
+  --color-warning: #8a5300;
+  --color-on-warning: #ffffff;
+  --color-danger: #b3261e;
+  --color-on-danger: #ffffff;
+}
+
+:root[data-theme="light"] {
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #4a4a4a;
+  --color-border: #c8c8c8;
+  --color-accent: #0b57d0;
+  --color-on-accent: #ffffff;
+  --color-success: #1b6e2d;
+  --color-on-success: #ffffff;
+  --color-warning: #8a5300;
+  --color-on-warning: #ffffff;
+  --color-danger: #b3261e;
+  --color-on-danger: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  --color-surface: #121212;
+  --color-text: #e6e6e6;
+  --color-text-muted: #b0b0b0;
+  --color-border: #444444;
+  --color-accent: #8ab4f8;
+  --color-on-accent: #0b1b33;
+  --color-success: #6dd58c;
+  --color-on-success: #08210f;
+  --color-warning: #f2b84b;
+  --color-on-warning: #2b1a00;
+  --color-danger: #f28b82;
+  --color-on-danger: #3b0a07;
+}
