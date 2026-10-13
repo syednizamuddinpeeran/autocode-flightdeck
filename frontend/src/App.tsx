@@ -6,6 +6,7 @@ import Runs from "./Runs";
 import Sessions from "./Sessions";
 import Settings from "./Settings";
 import SessionTimelineSection from "./SessionTimeline";
+import Suggestions from "./Suggestions";
 import Trends from "./Trends";
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
       <Install />
       <Runs />
       <Trends />
+      <Suggestions />
       <SessionTimelineSection />
     </>
   );
