@@ -3,6 +3,7 @@ import Harness from "./Harness";
 import Sessions from "./Sessions";
 import Settings from "./Settings";
 import SessionTimelineSection from "./SessionTimeline";
+import Trends from "./Trends";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Guard />
       <Settings />
       <Harness />
+      <Trends />
       <SessionTimelineSection />
     </>
   );
