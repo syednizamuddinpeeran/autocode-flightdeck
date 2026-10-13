@@ -21,6 +21,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+const REPOS_BODY = {
+  repos: [{ id: "r1", path: "/w/r1" }],
+  scan_warnings: [],
+};
+
 const PREVIEW = {
   preview_id: "p1",
   would_create: ["a.md"],
@@ -41,6 +46,7 @@ test("confirm is unavailable without a preview", () => {
 test("preview, required overwrite, install, then rescan", async () => {
   const fetchMock = vi
     .fn()
+    .mockResolvedValueOnce(json(200, REPOS_BODY))
     .mockResolvedValueOnce(json(200, PREVIEW))
     .mockResolvedValueOnce(json(200, { exit_code: 0, output: "done" }))
     .mockResolvedValueOnce(json(200, []));
@@ -58,7 +64,7 @@ test("preview, required overwrite, install, then rescan", async () => {
   })) as HTMLButtonElement;
   expect(screen.getByText("b.md")).toBeTruthy();
   expect(confirm.disabled).toBe(true);
-  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+  expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
     target: "/repo",
     repo: "github",
     os: "linux",
@@ -71,21 +77,19 @@ test("preview, required overwrite, install, then rescan", async () => {
   fireEvent.click(confirm);
 
   expect(await screen.findByText("done")).toBeTruthy();
-  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
-  expect(fetchMock.mock.calls[1][0]).toBe("/api/install");
-  expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+  expect(fetchMock.mock.calls[2][0]).toBe("/api/install");
+  expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({
     preview_id: "p1",
     overwrite: true,
   });
-  expect(fetchMock.mock.calls[2][0]).toBe("/api/repos/rescan");
+  expect(fetchMock.mock.calls[3][0]).toBe("/api/repos/rescan");
 });
 
 test("shows 422 from preview and offers no confirm", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(json(422, { detail: "Target is not a git repo" })),
+    vi.fn(async () => json(422, { detail: "Target is not a git repo" })),
   );
   render(<Install />);
   fireEvent.change(screen.getByLabelText("Target folder"), {
@@ -99,7 +103,12 @@ test("shows 422 from preview and offers no confirm", async () => {
 });
 
 test("editing the target discards the preview", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(200, PREVIEW)));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url === "/api/repos" ? json(200, REPOS_BODY) : json(200, PREVIEW),
+    ),
+  );
   render(<Install />);
   fireEvent.change(screen.getByLabelText("Target folder"), {
     target: { value: "/repo" },
@@ -109,6 +118,30 @@ test("editing the target discards the preview", async () => {
   fireEvent.change(screen.getByLabelText("Target folder"), {
     target: { value: "/other" },
   });
+  expect(screen.queryByRole("button", { name: "Confirm install" })).toBeNull();
+});
+
+test("picking a discovered repo fills the target and discards the preview", async () => {
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) =>
+    url === "/api/repos"
+      ? json(200, REPOS_BODY)
+      : json(200, init ? PREVIEW : {}),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  render(<Install />);
+  await screen.findByRole("option", { name: "/w/r1" });
+  const picker = screen.getByLabelText("Discovered repo");
+  fireEvent.change(picker, { target: { value: "/w/r1" } });
+  expect(
+    (screen.getByLabelText("Target folder") as HTMLInputElement).value,
+  ).toBe("/w/r1");
+  fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+  await screen.findByRole("button", { name: "Confirm install" });
+  const sent = fetchMock.mock.calls.find(
+    (c) => c[0] === "/api/install/preview",
+  );
+  expect(JSON.parse(String(sent?.[1]?.body)).target).toBe("/w/r1");
+  fireEvent.change(picker, { target: { value: "" } });
   expect(screen.queryByRole("button", { name: "Confirm install" })).toBeNull();
 });
 
