@@ -1,5 +1,6 @@
 import Guard from "./Guard";
 import Settings from "./Settings";
+import SessionTimelineSection from "./SessionTimeline";
 
 export default function App() {
   return (
@@ -7,6 +8,7 @@ export default function App() {
       <h1>Flight deck</h1>
       <Guard />
       <Settings />
+      <SessionTimelineSection />
     </>
   );
 }
