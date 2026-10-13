@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from flightdeck.folders import router as folders_router
+from flightdeck.harness import router as harness_router
 from flightdeck.install import router as install_router
 from flightdeck.repos import router as repos_router
 from flightdeck.runs import router as runs_router
@@ -15,6 +16,7 @@ DEFAULT_PORT = 8000
 app = FastAPI(title="Flight deck")
 app.include_router(folders_router)
 app.include_router(repos_router)
+app.include_router(harness_router)
 app.include_router(install_router)
 app.include_router(runs_router)
 app.include_router(sessions_router)
