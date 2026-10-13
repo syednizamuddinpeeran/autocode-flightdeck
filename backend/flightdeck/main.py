@@ -9,6 +9,7 @@ from flightdeck.harness import router as harness_router
 from flightdeck.install import router as install_router
 from flightdeck.repos import router as repos_router
 from flightdeck.runs import router as runs_router
+from flightdeck.session_detail import router as session_detail_router
 from flightdeck.sessions import router as sessions_router
 from flightdeck.trends import router as trends_router
 
@@ -23,6 +24,7 @@ app.include_router(harness_router)
 app.include_router(install_router)
 app.include_router(runs_router)
 app.include_router(sessions_router)
+app.include_router(session_detail_router)
 app.include_router(trends_router)
 
 
