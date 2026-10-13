@@ -4,6 +4,7 @@ import Runs from "./Runs";
 import Sessions from "./Sessions";
 import Settings from "./Settings";
 import SessionTimelineSection from "./SessionTimeline";
+import Trends from "./Trends";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Settings />
       <Harness />
       <Runs />
+      <Trends />
       <SessionTimelineSection />
     </>
   );
