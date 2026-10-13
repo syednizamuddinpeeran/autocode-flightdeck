@@ -2,6 +2,7 @@ import Guard from "./Guard";
 import Harness from "./Harness";
 import HarnessTemplate from "./HarnessTemplate";
 import Install from "./Install";
+import Runs from "./Runs";
 import Sessions from "./Sessions";
 import Settings from "./Settings";
 import SessionTimelineSection from "./SessionTimeline";
@@ -17,6 +18,7 @@ export default function App() {
       <Harness />
       <HarnessTemplate />
       <Install />
+      <Runs />
       <Trends />
       <SessionTimelineSection />
     </>
