@@ -25,17 +25,6 @@
           theme = "dark";
         }
         document.documentElement.setAttribute("data-theme", theme);
-        // Stored palette id (default has none). Unknown ids match no CSS block,
-        // so they look like Default until theme.ts normalises them.
-        var palette = null;
-        try {
-          palette = localStorage.getItem("flightdeck-palette");
-        } catch (e) {
-          /* storage unavailable: Default palette */
-        }
-        if (palette && /^[a-z0-9-]+$/.test(palette) && palette !== "default") {
-          document.documentElement.setAttribute("data-palette", palette);
-        }
       })();
     </script>
   </head>

@@ -6,17 +6,14 @@ const script = /<script>([\s\S]*?)<\/script>/.exec(html)![1];
 
 function run(opts: {
   stored?: string | null;
-  palette?: string | null;
   dark?: boolean;
   throws?: boolean;
 }) {
   const root = document.documentElement;
   root.removeAttribute("data-theme");
-  root.removeAttribute("data-palette");
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => {
       if (opts.throws) throw new Error("denied");
-      if (key === "flightdeck-palette") return opts.palette ?? null;
       return key === "flightdeck-theme" ? (opts.stored ?? null) : null;
     },
   });
@@ -56,21 +53,5 @@ describe("pre-paint theme script", () => {
 
   it("falls back to the system preference when storage throws", () => {
     expect(run({ throws: true, dark: true })).toBe("dark");
-  });
-
-  it("applies a stored palette before first paint", () => {
-    run({ palette: "midnight" });
-    expect(document.documentElement.getAttribute("data-palette")).toBe(
-      "midnight",
-    );
-  });
-
-  it("leaves no palette for default, missing, malformed or unreadable values", () => {
-    for (const palette of [null, "default", 'x"y', "A B"]) {
-      run({ palette });
-      expect(document.documentElement.hasAttribute("data-palette")).toBe(false);
-    }
-    run({ throws: true });
-    expect(document.documentElement.hasAttribute("data-palette")).toBe(false);
   });
 });
