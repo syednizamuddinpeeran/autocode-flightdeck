@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import Appearance from "./Appearance";
 
 interface Folder {
   id: string;
@@ -78,6 +79,7 @@ export default function Settings() {
   return (
     <section id="settings">
       <h2>Settings</h2>
+      <Appearance />
       <form onSubmit={onAdd}>
         <label>
           Folder path
