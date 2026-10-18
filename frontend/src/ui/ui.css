@@ -26,6 +26,66 @@
   gap: var(--space-2);
 }
 
+/* Badge: the label text carries the meaning; the tone is a reinforcement. */
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.6;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.badge-success {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+.badge-warning {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.badge-danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+/* Buttons */
+.btn {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.btn-secondary {
+  border-color: var(--color-text-muted);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.btn-danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.btn:disabled {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
 /* Form fields: label above the control, even spacing. */
 .field {
   display: flex;
@@ -67,4 +127,36 @@
 }
 .loading {
   color: var(--color-text-muted);
+}
+
+/* Tables: scroll inside the container, header stays visible in long lists. */
+.table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.table-wrap table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-wrap th,
+.table-wrap td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-bottom-width: 2px;
+}
+.table-wrap tbody tr:last-child th,
+.table-wrap tbody tr:last-child td {
+  border-bottom: 0;
 }

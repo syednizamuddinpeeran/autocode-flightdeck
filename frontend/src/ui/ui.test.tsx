@@ -2,7 +2,17 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import rawCss from "./ui.css?raw";
 import rawTheme from "../theme.css?raw";
-import { Card, EmptyState, ErrorMessage, Field, Loading, PageHeader } from ".";
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorMessage,
+  Field,
+  Loading,
+  PageHeader,
+  TableWrap,
+} from ".";
 
 afterEach(cleanup);
 
@@ -23,6 +33,51 @@ describe("components render", () => {
   test("PageHeader without actions renders no actions container", () => {
     const { container } = render(<PageHeader title="Runs" />);
     expect(container.querySelector(".page-header-actions")).toBeNull();
+  });
+
+  test.each(["neutral", "success", "warning", "danger"] as const)(
+    "Badge %s shows its meaning as text",
+    (tone) => {
+      render(<Badge tone={tone}>{`status ${tone}`}</Badge>);
+      const el = screen.getByText(`status ${tone}`);
+      expect(el.className).toContain(`badge-${tone}`);
+      expect(el.textContent?.length).toBeGreaterThan(0);
+    },
+  );
+
+  test("Badge defaults to neutral", () => {
+    render(<Badge>pass</Badge>);
+    expect(screen.getByText("pass").className).toContain("badge-neutral");
+  });
+
+  test.each(["primary", "secondary", "danger"] as const)(
+    "Button %s variant",
+    (variant) => {
+      render(<Button variant={variant}>Go</Button>);
+      expect(screen.getByRole("button", { name: "Go" }).className).toContain(
+        `btn-${variant}`,
+      );
+    },
+  );
+
+  test("Button is secondary and type=button by default, and can be disabled", () => {
+    render(
+      <>
+        <Button>Plain</Button>
+        <Button disabled>Off</Button>
+        <Button type="submit">Send</Button>
+      </>,
+    );
+    const plain = screen.getByRole("button", { name: "Plain" });
+    expect(plain.className).toContain("btn-secondary");
+    expect(plain.getAttribute("type")).toBe("button");
+    expect(
+      (screen.getByRole("button", { name: "Off" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Send" }).getAttribute("type"),
+    ).toBe("submit");
   });
 
   test("Field labels its control and shows a hint", () => {
@@ -53,6 +108,23 @@ describe("components render", () => {
     render(<Loading>Fetching runs</Loading>);
     expect(screen.getByRole("status").textContent).toBe("Fetching runs");
   });
+
+  test("TableWrap is a labelled, focusable scroll region around the table", () => {
+    render(
+      <TableWrap label="Runs table">
+        <table>
+          <tbody>
+            <tr>
+              <td>x</td>
+            </tr>
+          </tbody>
+        </table>
+      </TableWrap>,
+    );
+    const region = screen.getByRole("region", { name: "Runs table" });
+    expect(region.getAttribute("tabindex")).toBe("0");
+    expect(region.querySelector("table")).not.toBeNull();
+  });
 });
 
 describe("ui.css", () => {
@@ -75,6 +147,13 @@ describe("ui.css", () => {
 
   test("styles every tone, variant and state", () => {
     for (const sel of [
+      ".badge-success",
+      ".badge-warning",
+      ".badge-danger",
+      ".btn-primary",
+      ".btn-secondary",
+      ".btn-danger",
+      ".btn:disabled",
       ".field",
       ".empty-state",
       ".error-message",
@@ -84,11 +163,20 @@ describe("ui.css", () => {
     }
   });
 
+  test("tables scroll inside their container and keep the header sticky", () => {
+    expect(css).toMatch(/\.table-wrap\s*\{[^}]*overflow:\s*auto/);
+    expect(css).toMatch(/\.table-wrap thead th\s*\{[^}]*position:\s*sticky/);
+  });
+
   test("only pairs text and background tokens that are contrast-checked", () => {
     // theme.test.ts / palettes check these pairs at 4.5:1.
     const allowed = new Set([
       "--color-text/--color-surface",
       "--color-text-muted/--color-surface",
+      "--color-on-accent/--color-accent",
+      "--color-on-success/--color-success",
+      "--color-on-warning/--color-warning",
+      "--color-on-danger/--color-danger",
     ]);
     for (const [, body] of css.matchAll(/\{([^}]*)\}/g)) {
       const fg = /(?:^|;|\s)color:\s*var\((--[a-z-]+)\)/.exec(body)?.[1];
