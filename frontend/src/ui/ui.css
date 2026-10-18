@@ -1,0 +1,162 @@
+/* Shared UI building blocks. Theme tokens only: no colour literals. */
+
+.card {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-4);
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.page-header h2 {
+  margin: 0;
+}
+.page-header-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Badge: the label text carries the meaning; the tone is a reinforcement. */
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.6;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.badge-success {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+.badge-warning {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.badge-danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+
+/* Buttons */
+.btn {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.btn-secondary {
+  border-color: var(--color-text-muted);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.btn-danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.btn:disabled {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Form fields: label above the control, even spacing. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+.field-label {
+  font-weight: 600;
+}
+.field-hint {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+/* Empty, error and loading states */
+.empty-state {
+  padding: var(--space-5);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.empty-state p {
+  margin: var(--space-2) 0 0;
+}
+.error-message {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-left-width: 6px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.error-message::before {
+  content: "\26A0\00a0";
+  color: var(--color-danger);
+}
+.loading {
+  color: var(--color-text-muted);
+}
+
+/* Tables: scroll inside the container, header stays visible in long lists. */
+.table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.table-wrap table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-wrap th,
+.table-wrap td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-bottom-width: 2px;
+}
+.table-wrap tbody tr:last-child th,
+.table-wrap tbody tr:last-child td {
+  border-bottom: 0;
+}
