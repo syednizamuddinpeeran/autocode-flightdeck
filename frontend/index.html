@@ -4,6 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flight deck</title>
+    <script>
+      // Runs before first paint so there is no theme flash. Stored choice
+      // ("light" | "dark") under "flightdeck-theme" wins; anything else follows
+      // prefers-color-scheme. Tested in src/themeInit.test.ts.
+      (function () {
+        var theme = "light";
+        var stored = null;
+        try {
+          stored = localStorage.getItem("flightdeck-theme");
+        } catch (e) {
+          /* storage unavailable: fall through to the system preference */
+        }
+        if (stored === "light" || stored === "dark") {
+          theme = stored;
+        } else if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          theme = "dark";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
