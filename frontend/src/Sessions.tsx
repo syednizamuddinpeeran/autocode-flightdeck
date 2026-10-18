@@ -1,4 +1,12 @@
 import { useEffect, useState } from "react";
+import {
+  Card,
+  EmptyState,
+  ErrorMessage,
+  Field,
+  PageHeader,
+  TableWrap,
+} from "./ui";
 
 interface Repo {
   id: string;
@@ -75,54 +83,57 @@ export default function Sessions() {
 
   return (
     <section>
-      <h2>Sessions</h2>
-      {error && <p role="alert">{error}</p>}
+      <PageHeader title="Sessions" />
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       {hasFolders === false && (
-        <p>
+        <EmptyState>
           No watched folders yet. <a href="#settings">Add one in Settings</a>.
-        </p>
+        </EmptyState>
       )}
       {hasFolders && (
-        <>
-          <label>
-            Repo
-            <select value={repo} onChange={(e) => setRepo(e.target.value)}>
-              <option value="">All repos</option>
-              {repos.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.path}
-                </option>
-              ))}
-            </select>
-          </label>
+        <Card>
+          <div className="toolbar">
+            <Field label="Repo">
+              <select value={repo} onChange={(e) => setRepo(e.target.value)}>
+                <option value="">All repos</option>
+                {repos.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.path}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
           {skipped > 0 && <p>{skipped} malformed log lines skipped.</p>}
-          <table>
-            <thead>
-              <tr>
-                <th>Repo</th>
-                <th>Session</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Branch</th>
-                <th>Surface</th>
-                <th>End reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s) => (
-                <tr key={`${s.repo_id}/${s.session_id}`}>
-                  <td>{repoName(s.repo_id)}</td>
-                  <td>{s.session_id}</td>
-                  <td>{s.start ?? ""}</td>
-                  <td>{s.end ?? "running"}</td>
-                  <td>{s.branch ?? ""}</td>
-                  <td>{s.surface ?? ""}</td>
-                  <td>{s.end_reason ?? ""}</td>
+          <TableWrap label="Sessions table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Repo</th>
+                  <th>Session</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Branch</th>
+                  <th>Surface</th>
+                  <th>End reason</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {sessions.map((s) => (
+                  <tr key={`${s.repo_id}/${s.session_id}`}>
+                    <td>{repoName(s.repo_id)}</td>
+                    <td>{s.session_id}</td>
+                    <td>{s.start ?? ""}</td>
+                    <td>{s.end ?? "running"}</td>
+                    <td>{s.branch ?? ""}</td>
+                    <td>{s.surface ?? ""}</td>
+                    <td>{s.end_reason ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+        </Card>
       )}
     </section>
   );
