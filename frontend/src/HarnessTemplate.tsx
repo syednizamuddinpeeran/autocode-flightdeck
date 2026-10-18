@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { GENERIC_ERROR, readDetail } from "./detail";
+import { Button, Card, ErrorMessage, Field } from "./ui";
 
 export default function HarnessTemplate() {
   const [path, setPath] = useState("");
@@ -47,17 +48,20 @@ export default function HarnessTemplate() {
   }
 
   return (
-    <section>
-      <h3>Harness template</h3>
-      <form onSubmit={onSave}>
-        <label>
-          Harness template path
-          <input value={path} onChange={(e) => setPath(e.target.value)} />
-        </label>
-        <button type="submit">Save template</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
-      {saved && <p>Saved: {saved}</p>}
-    </section>
+    <Card>
+      <section>
+        <h3>Harness template</h3>
+        <form onSubmit={onSave}>
+          <Field label="Harness template path">
+            <input value={path} onChange={(e) => setPath(e.target.value)} />
+          </Field>
+          <Button type="submit" variant="primary">
+            Save template
+          </Button>
+        </form>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {saved && <p>Saved: {saved}</p>}
+      </section>
+    </Card>
   );
 }
