@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorMessage,
+  Field,
+  Loading,
+  PageHeader,
+} from "./ui";
+import type { BadgeTone } from "./ui";
 
 export interface TimelineEvent {
   ts: string;
@@ -23,19 +34,18 @@ function kindOf(ev: TimelineEvent): Kind {
   return "normal";
 }
 
+const TONES: Record<Kind, BadgeTone> = {
+  error: "danger",
+  failed: "danger",
+  denied: "warning",
+  normal: "neutral",
+};
 const LABELS: Record<Kind, string> = {
   error: "ERROR",
   failed: "FAILED",
   denied: "DENIED",
   normal: "",
 };
-const COLORS: Record<Kind, string> = {
-  error: "#b00020",
-  failed: "#c75000",
-  denied: "#6a1b9a",
-  normal: "#888",
-};
-
 function formatDuration(ms: number): string {
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${ms} ms`;
 }
@@ -75,30 +85,23 @@ export function SessionTimeline({ repo, id }: { repo: string; id: string }) {
     };
   }, [repo, id]);
 
-  if (error) return <p role="alert">{error}</p>;
-  if (events === null) return <p>Loading...</p>;
-  if (events.length === 0) return <p>This session has no events.</p>;
+  if (error) return <ErrorMessage>{error}</ErrorMessage>;
+  if (events === null) return <Loading />;
+  if (events.length === 0)
+    return <EmptyState>This session has no events.</EmptyState>;
 
   return (
-    <ol aria-label="Session timeline" style={{ listStyle: "none", padding: 0 }}>
+    <ol aria-label="Session timeline" className="timeline">
       {events.map((ev, i) => {
         const kind = kindOf(ev);
         return (
-          <li
-            key={i}
-            data-kind={kind}
-            style={{
-              borderLeft: `4px solid ${COLORS[kind]}`,
-              padding: "4px 8px",
-              margin: "4px 0",
-            }}
-          >
+          <li key={i} data-kind={kind} className="timeline-item">
             <time>{ev.ts}</time> <strong>{ev.event}</strong>
             {kind !== "normal" && (
-              <span style={{ color: COLORS[kind], fontWeight: "bold" }}>
+              <>
                 {" "}
-                [{LABELS[kind]}]
-              </span>
+                <Badge tone={TONES[kind]}>{`[${LABELS[kind]}]`}</Badge>
+              </>
             )}
             {ev.duration_ms !== null && ev.duration_ms !== undefined && (
               <span> ({formatDuration(ev.duration_ms)})</span>
@@ -129,15 +132,18 @@ export default function SessionTimelineSection() {
 
   return (
     <section>
-      <h2>Session timeline</h2>
-      <form onSubmit={onSubmit}>
-        <label>
-          Session (repo/id){" "}
-          <input value={text} onChange={(e) => setText(e.target.value)} />
-        </label>{" "}
-        <button type="submit">Open</button>
-      </form>
-      {sel && <SessionTimeline repo={sel.repo} id={sel.id} />}
+      <PageHeader title="Session timeline" />
+      <Card>
+        <form onSubmit={onSubmit} className="toolbar">
+          <Field label="Session (repo/id)">
+            <input value={text} onChange={(e) => setText(e.target.value)} />
+          </Field>
+          <Button type="submit" variant="primary">
+            Open
+          </Button>
+        </form>
+        {sel && <SessionTimeline repo={sel.repo} id={sel.id} />}
+      </Card>
     </section>
   );
 }

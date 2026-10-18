@@ -9,3 +9,4 @@ export { Field } from "./Field";
 export { PageHeader } from "./PageHeader";
 export { EmptyState, ErrorMessage, Loading } from "./States";
 export { TableWrap } from "./TableWrap";
+export { statusTone } from "./statusTone";

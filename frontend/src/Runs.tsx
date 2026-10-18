@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  ErrorMessage,
+  Field,
+  PageHeader,
+  statusTone,
+} from "./ui";
 
 interface Run {
   repo_id: string;
@@ -58,54 +67,59 @@ export default function Runs() {
 
   return (
     <section>
-      <h2>Runs</h2>
-      <label>
-        Repo
-        <select value={repo} onChange={(e) => setRepo(e.target.value)}>
-          <option value="">All repos</option>
-          {repos.map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
+      <PageHeader title="Runs" />
+      <Card>
+        <div className="toolbar">
+          <Field label="Repo">
+            <select value={repo} onChange={(e) => setRepo(e.target.value)}>
+              <option value="">All repos</option>
+              {repos.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <ul aria-label="Runs" className="run-list">
+          {shown.map((r) => (
+            <li key={`${r.repo_id}#${r.issue}`}>
+              <span>{r.repo_name}</span>{" "}
+              <Button onClick={() => open(r)}>Issue {r.issue}</Button>{" "}
+              <span data-testid="status">
+                <Badge tone={statusTone(r.status)}>{r.status}</Badge>
+              </span>
+            </li>
           ))}
-        </select>
-      </label>
-      {error && <p role="alert">{error}</p>}
-      <ul aria-label="Runs">
-        {shown.map((r) => (
-          <li key={`${r.repo_id}#${r.issue}`}>
-            <span>{r.repo_name}</span>{" "}
-            <button type="button" onClick={() => open(r)}>
-              Issue {r.issue}
-            </button>{" "}
-            <span data-testid="status">{r.status}</span>
-          </li>
-        ))}
-      </ul>
+        </ul>
+      </Card>
       {detail && (
-        <article aria-label="Run detail">
-          <h3>
-            {detail.repo_name} issue {detail.issue}
-          </h3>
-          <dl>
-            <dt>Status</dt>
-            <dd>{detail.status}</dd>
-            <dt>Plan tasks</dt>
-            <dd>{detail.plan_tasks}</dd>
-            <dt>Review verdict</dt>
-            <dd>{detail.review_verdict ?? "none"}</dd>
-            <dt>BLOCKING</dt>
-            <dd>{detail.blocking}</dd>
-            <dt>NIT</dt>
-            <dd>{detail.nit}</dd>
-            <dt>Last verify</dt>
-            <dd>{detail.verify_result ?? "none"}</dd>
-            <dt>Artifacts</dt>
-            <dd>{detail.artifacts.join(", ")}</dd>
-            <dt>Source</dt>
-            <dd>{detail.source}</dd>
-          </dl>
-        </article>
+        <Card>
+          <article aria-label="Run detail">
+            <h3>
+              {detail.repo_name} issue {detail.issue}
+            </h3>
+            <dl className="detail-list">
+              <dt>Status</dt>
+              <dd>{detail.status}</dd>
+              <dt>Plan tasks</dt>
+              <dd>{detail.plan_tasks}</dd>
+              <dt>Review verdict</dt>
+              <dd>{detail.review_verdict ?? "none"}</dd>
+              <dt>BLOCKING</dt>
+              <dd>{detail.blocking}</dd>
+              <dt>NIT</dt>
+              <dd>{detail.nit}</dd>
+              <dt>Last verify</dt>
+              <dd>{detail.verify_result ?? "none"}</dd>
+              <dt>Artifacts</dt>
+              <dd>{detail.artifacts.join(", ")}</dd>
+              <dt>Source</dt>
+              <dd>{detail.source}</dd>
+            </dl>
+          </article>
+        </Card>
       )}
     </section>
   );
