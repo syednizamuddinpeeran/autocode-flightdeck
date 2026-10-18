@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  Badge,
+  Card,
+  EmptyState,
+  ErrorMessage,
+  Loading,
+  PageHeader,
+  TableWrap,
+} from "./ui";
 
 interface SessionRef {
   repo_id: string;
@@ -45,54 +54,60 @@ export default function Guard() {
 
   let body;
   if (error) {
-    body = <p role="alert">{error}</p>;
+    body = <ErrorMessage>{error}</ErrorMessage>;
   } else if (!summary) {
-    body = <p>Loading...</p>;
+    body = <Loading />;
   } else if (summary.total === 0) {
-    body = <p>No guard decisions logged yet.</p>;
+    body = <EmptyState>No guard decisions logged yet.</EmptyState>;
   } else {
     body = (
       <>
-        <p>
-          Allowed: <strong data-testid="allow">{summary.allow}</strong> Denied:{" "}
-          <strong data-testid="deny">{summary.deny}</strong> Total:{" "}
-          <strong data-testid="total">{summary.total}</strong>
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Denial reason</th>
-              <th>Count</th>
-              <th>Sessions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summary.reasons.map((r) => (
-              <tr key={r.reason}>
-                <td>{r.reason}</td>
-                <td>{r.count}</td>
-                <td>
-                  {r.sessions.map((s) => (
-                    <a
-                      key={`${s.repo_id}/${s.session_id}`}
-                      href={sessionHref(s)}
-                      style={{ marginRight: "0.5em" }}
-                    >
-                      {s.session_id}
-                    </a>
-                  ))}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card>
+          <p className="summary">
+            <Badge tone="success">Allowed</Badge>{" "}
+            <strong data-testid="allow">{summary.allow}</strong>{" "}
+            <Badge tone="danger">Denied</Badge>{" "}
+            <strong data-testid="deny">{summary.deny}</strong>{" "}
+            <Badge>Total</Badge>{" "}
+            <strong data-testid="total">{summary.total}</strong>
+          </p>
+          <TableWrap label="Denial reasons">
+            <table>
+              <thead>
+                <tr>
+                  <th>Denial reason</th>
+                  <th>Count</th>
+                  <th>Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.reasons.map((r) => (
+                  <tr key={r.reason}>
+                    <td>{r.reason}</td>
+                    <td>{r.count}</td>
+                    <td className="session-links">
+                      {r.sessions.map((s) => (
+                        <a
+                          key={`${s.repo_id}/${s.session_id}`}
+                          href={sessionHref(s)}
+                        >
+                          {s.session_id}
+                        </a>
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+        </Card>
       </>
     );
   }
 
   return (
     <section>
-      <h2>Guard</h2>
+      <PageHeader title="Guard" />
       {body}
     </section>
   );
