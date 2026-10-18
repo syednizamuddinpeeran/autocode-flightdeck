@@ -229,3 +229,13 @@
 .detail-list dd {
   margin: 0;
 }
+
+/* A card starts with its heading, not a page-sized gap. */
+.card > h3:first-child,
+.card section > h3:first-child {
+  margin-top: 0;
+}
+.table-wrap caption {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
