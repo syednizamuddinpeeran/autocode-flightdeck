@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  PALETTES,
   getMode,
+  getPalette,
   initTheme,
   resetThemeState,
   setMode,
+  setPalette,
   subscribe,
 } from "./theme";
 
@@ -34,6 +37,7 @@ beforeEach(() => {
   localStorage.clear();
   resetThemeState();
   root.removeAttribute("data-theme");
+  root.removeAttribute("data-palette");
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -80,6 +84,8 @@ describe("mode", () => {
     expect(getMode()).toBe("system");
     expect(() => setMode("dark")).not.toThrow();
     expect(root.getAttribute("data-theme")).toBe("dark");
+    expect(() => setPalette("midnight")).not.toThrow();
+    expect(root.getAttribute("data-palette")).toBe("midnight");
   });
 
   it("works when matchMedia is missing", () => {
@@ -112,5 +118,35 @@ describe("live OS changes", () => {
     setMode("light");
     os.set(true);
     expect(root.getAttribute("data-theme")).toBe("light");
+  });
+});
+
+describe("palette", () => {
+  it("offers at least three, starting with default", () => {
+    expect(PALETTES.length).toBeGreaterThanOrEqual(3);
+    expect(PALETTES[0].id).toBe("default");
+  });
+
+  it("is default when nothing is stored or the value is unknown", () => {
+    expect(getPalette()).toBe("default");
+    localStorage.setItem("flightdeck-palette", "nope");
+    expect(getPalette()).toBe("default");
+  });
+
+  it("applies, persists, and default clears the attribute", () => {
+    stubMatchMedia(false);
+    setPalette("midnight");
+    expect(root.getAttribute("data-palette")).toBe("midnight");
+    expect(localStorage.getItem("flightdeck-palette")).toBe("midnight");
+    setPalette("default");
+    expect(root.hasAttribute("data-palette")).toBe(false);
+    expect(localStorage.getItem("flightdeck-palette")).toBeNull();
+  });
+
+  it("treats an unknown id as default", () => {
+    stubMatchMedia(false);
+    setPalette("nope");
+    expect(getPalette()).toBe("default");
+    expect(root.hasAttribute("data-palette")).toBe(false);
   });
 });

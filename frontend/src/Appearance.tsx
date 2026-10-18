@@ -1,9 +1,18 @@
 import { useSyncExternalStore } from "react";
-import { MODES, getMode, setMode, subscribe } from "./theme";
+import {
+  MODES,
+  PALETTES,
+  getMode,
+  getPalette,
+  setMode,
+  setPalette,
+  subscribe,
+} from "./theme";
 import type { Mode } from "./theme";
 
 export default function Appearance() {
   const mode = useSyncExternalStore(subscribe, getMode);
+  const palette = useSyncExternalStore(subscribe, getPalette);
 
   return (
     <section aria-labelledby="appearance-heading">
@@ -23,6 +32,18 @@ export default function Appearance() {
           </label>
         ))}
       </fieldset>
+      <p>
+        <label>
+          Palette{" "}
+          <select value={palette} onChange={(e) => setPalette(e.target.value)}>
+            {PALETTES.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </p>
     </section>
   );
 }
