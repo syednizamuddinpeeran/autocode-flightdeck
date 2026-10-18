@@ -9,6 +9,7 @@ beforeEach(() => {
   localStorage.clear();
   resetThemeState();
   root.removeAttribute("data-theme");
+  root.removeAttribute("data-palette");
   vi.stubGlobal("matchMedia", () => ({ matches: false }));
 });
 afterEach(() => {
@@ -43,10 +44,24 @@ test("picking Dark applies immediately and persists", () => {
   );
 });
 
-test("starts on System when storage holds an invalid value", () => {
+test("lists at least three palettes and applies the chosen one", () => {
+  render(<Appearance />);
+  const select = screen.getByLabelText("Palette") as HTMLSelectElement;
+  expect(select.options.length).toBeGreaterThanOrEqual(3);
+  fireEvent.change(select, { target: { value: "high-contrast" } });
+  expect(root.getAttribute("data-palette")).toBe("high-contrast");
+  expect(localStorage.getItem("flightdeck-palette")).toBe("high-contrast");
+  expect(select.value).toBe("high-contrast");
+});
+
+test("starts on System and Default when storage holds invalid values", () => {
   localStorage.setItem("flightdeck-theme", "bogus");
+  localStorage.setItem("flightdeck-palette", "bogus");
   render(<Appearance />);
   expect((screen.getByLabelText("System") as HTMLInputElement).checked).toBe(
     true,
+  );
+  expect((screen.getByLabelText("Palette") as HTMLSelectElement).value).toBe(
+    "default",
   );
 });
