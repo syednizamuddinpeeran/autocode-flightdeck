@@ -7,6 +7,6 @@ export default defineConfig({
   server: { proxy: { "/api": "http://localhost:8000" } },
   test: {
     environment: "jsdom",
-    css: { include: [/theme\.css/, /styles\.css/] },
+    css: { include: [/theme\.css/, /styles\.css/, /App\.css/] },
   },
 });
