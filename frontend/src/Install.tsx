@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { GENERIC_ERROR, readDetail } from "./detail";
+import { Button, Card, ErrorMessage, Field, PageHeader } from "./ui";
+import "./Forms.css";
 
 interface Preview {
   preview_id: string;
@@ -125,92 +127,95 @@ export default function Install() {
 
   return (
     <section>
-      <h2>Install harness</h2>
-      <label>
-        Discovered repo
-        <select
-          value={repos.some((r) => r.path === target) ? target : ""}
-          onChange={(e) => {
-            setTarget(e.target.value);
-            reset();
-          }}
-        >
-          <option value="">(type a path below)</option>
-          {repos.map((r) => (
-            <option key={r.id} value={r.path}>
-              {r.path}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Target folder
-        <input
-          value={target}
-          onChange={(e) => {
-            setTarget(e.target.value);
-            reset();
-          }}
-        />
-      </label>
-      {(Object.keys(CHOICES) as (keyof Options)[]).map((key) => (
-        <label key={key}>
-          {LABELS[key]}
+      <PageHeader title="Install harness" />
+      <Card>
+        <Field label="Discovered repo">
           <select
-            value={options[key]}
+            value={repos.some((r) => r.path === target) ? target : ""}
             onChange={(e) => {
-              setOptions({ ...options, [key]: e.target.value });
+              setTarget(e.target.value);
               reset();
             }}
           >
-            {CHOICES[key].map((v) => (
-              <option key={v} value={v}>
-                {v}
+            <option value="">(type a path below)</option>
+            {repos.map((r) => (
+              <option key={r.id} value={r.path}>
+                {r.path}
               </option>
             ))}
           </select>
-        </label>
-      ))}
-      <button type="button" onClick={onPreview} disabled={!target}>
-        Preview
-      </button>
-      {error && <p role="alert">{error}</p>}
-      {preview && (
-        <div>
-          <h3>Would create</h3>
-          <ul>
-            {preview.would_create.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          <h3>Would overwrite</h3>
-          <ul>
-            {preview.would_overwrite.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          {preview.requires_overwrite && (
-            <label>
-              <input
-                type="checkbox"
-                checked={overwrite}
-                onChange={(e) => setOverwrite(e.target.checked)}
-              />
-              Overwrite existing files
-            </label>
-          )}
-          <button type="button" onClick={onConfirm} disabled={blocked}>
-            Confirm install
-          </button>
+        </Field>
+        <Field label="Target folder">
+          <input
+            value={target}
+            onChange={(e) => {
+              setTarget(e.target.value);
+              reset();
+            }}
+          />
+        </Field>
+        {(Object.keys(CHOICES) as (keyof Options)[]).map((key) => (
+          <Field key={key} label={LABELS[key]}>
+            <select
+              value={options[key]}
+              onChange={(e) => {
+                setOptions({ ...options, [key]: e.target.value });
+                reset();
+              }}
+            >
+              {CHOICES[key].map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </Field>
+        ))}
+        <div className="form-actions">
+          <Button onClick={onPreview} disabled={!target}>
+            Preview
+          </Button>
         </div>
-      )}
-      {result && (
-        <div>
-          <p>Exit code: {result.exit_code}</p>
-          <pre>{result.output}</pre>
-        </div>
-      )}
-      {rescanned && <p>Repos rescanned.</p>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {preview && (
+          <div>
+            <h3>Would create</h3>
+            <ul>
+              {preview.would_create.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <h3>Would overwrite</h3>
+            <ul>
+              {preview.would_overwrite.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            {preview.requires_overwrite && (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={overwrite}
+                  onChange={(e) => setOverwrite(e.target.checked)}
+                />
+                Overwrite existing files
+              </label>
+            )}
+            <div className="form-actions">
+              <Button variant="primary" onClick={onConfirm} disabled={blocked}>
+                Confirm install
+              </Button>
+            </div>
+          </div>
+        )}
+        {result && (
+          <div>
+            <p>Exit code: {result.exit_code}</p>
+            <pre>{result.output}</pre>
+          </div>
+        )}
+        {rescanned && <p>Repos rescanned.</p>}
+      </Card>
     </section>
   );
 }

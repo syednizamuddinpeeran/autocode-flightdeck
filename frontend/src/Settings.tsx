@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Appearance from "./Appearance";
+import { Button, Card, ErrorMessage, Field, PageHeader } from "./ui";
+import "./Forms.css";
 
 interface Folder {
   id: string;
@@ -78,26 +80,32 @@ export default function Settings() {
 
   return (
     <section id="settings">
-      <h2>Settings</h2>
+      <PageHeader title="Settings" />
       <Appearance />
-      <form onSubmit={onAdd}>
-        <label>
-          Folder path
-          <input value={path} onChange={(e) => setPath(e.target.value)} />
-        </label>
-        <button type="submit">Add</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
-      <ul>
-        {folders.map((f) => (
-          <li key={f.id}>
-            <span>{f.path}</span>
-            <button type="button" onClick={() => onRemove(f.id)}>
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+      <Card>
+        <h3>Watched folders</h3>
+        <form onSubmit={onAdd}>
+          <Field label="Folder path">
+            <input value={path} onChange={(e) => setPath(e.target.value)} />
+          </Field>
+          <div className="form-actions">
+            <Button type="submit" variant="primary">
+              Add
+            </Button>
+          </div>
+        </form>
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        <ul className="folder-list">
+          {folders.map((f) => (
+            <li key={f.id}>
+              <span>{f.path}</span>
+              <Button variant="danger" onClick={() => onRemove(f.id)}>
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </section>
   );
 }
