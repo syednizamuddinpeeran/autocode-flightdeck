@@ -160,3 +160,37 @@
 .table-wrap tbody tr:last-child td {
   border-bottom: 0;
 }
+
+/* Page layouts shared by Sessions, Runs, Guard and the session timeline. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.toolbar .field {
+  margin-bottom: 0;
+}
+
+/* Vertical timeline: the bar colour is a hint; the [LABEL] badge says it too. */
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timeline-item {
+  margin: var(--space-2) 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 4px solid var(--color-border);
+}
+.timeline-item[data-kind="error"],
+.timeline-item[data-kind="failed"] {
+  border-left-color: var(--color-danger);
+}
+.timeline-item[data-kind="denied"] {
+  border-left-color: var(--color-warning);
+}
+.timeline-item time {
+  color: var(--color-text-muted);
+}

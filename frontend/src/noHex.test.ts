@@ -16,7 +16,7 @@ const COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 // Files that still hard-code colours and are due to be restyled with theme
 // tokens (issue #53, SessionTimeline). Remove an entry when its file is clean;
 // the test below fails if an entry is stale, so this list can only shrink.
-const PENDING_RESTYLE = ["./SessionTimeline.tsx"];
+const PENDING_RESTYLE: string[] = [];
 
 test("src/ has no colour literals outside theme.css", () => {
   expect(Object.keys(sources).length).toBeGreaterThan(10);
