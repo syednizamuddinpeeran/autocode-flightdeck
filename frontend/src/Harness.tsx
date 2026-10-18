@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { Card, EmptyState, ErrorMessage, Field, PageHeader } from "./ui";
+import "./Harness.css";
 
 interface Agent {
   name: string;
@@ -45,10 +47,12 @@ function Section(props: {
   children: ReactNode;
 }) {
   return (
-    <section>
-      <h3>{props.title}</h3>
-      {props.empty ? <p>None found.</p> : props.children}
-    </section>
+    <Card>
+      <section>
+        <h3>{props.title}</h3>
+        {props.empty ? <EmptyState>None found.</EmptyState> : props.children}
+      </section>
+    </Card>
   );
 }
 
@@ -66,7 +70,7 @@ function RuleBlock(props: { title: string; rules: Rules }) {
 function Pairs(props: { title: string; pairs: Pair[] }) {
   return (
     <Section title={props.title} empty={props.pairs.length === 0}>
-      <dl>
+      <dl className="pairs">
         {props.pairs.map((p) => (
           <div key={p.key}>
             <dt>{p.key}</dt>
@@ -123,23 +127,24 @@ export default function Harness() {
 
   return (
     <section>
-      <h2>Harness</h2>
-      <label>
-        Repo
-        <select value={repo} onChange={(e) => setRepo(e.target.value)}>
-          <option value="">Select a repo</option>
-          {repos.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.path}
-            </option>
-          ))}
-        </select>
-      </label>
-      {error && <p role="alert">{error}</p>}
+      <PageHeader title="Harness" />
+      <div className="toolbar">
+        <Field label="Repo">
+          <select value={repo} onChange={(e) => setRepo(e.target.value)}>
+            <option value="">Select a repo</option>
+            {repos.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.path}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       {data && repo && (
         <>
           <Section title="Agents" empty={data.agents.length === 0}>
-            <ul>
+            <ul className="harness-list">
               {data.agents.map((a) => (
                 <li key={a.name}>
                   <strong>{a.name}</strong> {a.description}
@@ -149,7 +154,7 @@ export default function Harness() {
             </ul>
           </Section>
           <Section title="Skills" empty={data.skills.length === 0}>
-            <ul>
+            <ul className="harness-list">
               {data.skills.map((s) => (
                 <li key={s.name}>
                   <strong>{s.name}</strong> {s.description}
@@ -158,7 +163,7 @@ export default function Harness() {
             </ul>
           </Section>
           <Section title="Hooks" empty={data.hooks.length === 0}>
-            <ul>
+            <ul className="harness-list">
               {data.hooks.map((h, i) => (
                 <li key={`${h.event}-${i}`}>
                   <strong>{h.event}</strong> {h.script}
