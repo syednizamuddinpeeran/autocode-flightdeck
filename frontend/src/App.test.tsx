@@ -12,6 +12,8 @@ test("renders title and settings", async () => {
     "fetch",
     vi.fn(async () => new Response("[]", { status: 200 })),
   );
+  // Pages are shown one at a time now, so go to Settings first.
+  window.location.hash = "#/settings";
   render(<App />);
   expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
     "Flight deck",
