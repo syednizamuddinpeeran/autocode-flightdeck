@@ -167,3 +167,35 @@ def test_theming_unchanged() -> None:
         check=False,
     )
     assert diff.returncode == 0, "docs/theming.md differs from main"
+
+
+README = ROOT / "README.md"
+README_DOCS = ["installation.md", "usage.md", "architecture.md", "theming.md"]
+
+
+def _headings(text: str) -> list[str]:
+    return [m.lower() for m in re.findall(r"^#{1,6}\s+(.+?)\s*$", text, re.M)]
+
+
+def test_readme_exists_with_sections() -> None:
+    assert README.is_file(), "README.md missing at repo root"
+    text = _read(README)
+    headings = _headings(text)
+    for section in ("overview", "prerequisites", "quick install", "quick start"):
+        assert any(section in h for h in headings), f"README has no '{section}' heading"
+    lowered = text.lower()
+    assert "wsl" in lowered and "linux" in lowered
+    assert "windows" in lowered
+
+
+def test_readme_links_docs() -> None:
+    assert README.is_file(), "README.md missing at repo root"
+    text = _read(README)
+    for name in README_DOCS:
+        assert f"docs/{name}" in text, f"README does not link docs/{name}"
+        assert (DOCS / name).is_file(), f"docs/{name} does not exist"
+
+
+def test_readme_local_use_only() -> None:
+    assert README.is_file(), "README.md missing at repo root"
+    assert "local use only" in _read(README).lower()
