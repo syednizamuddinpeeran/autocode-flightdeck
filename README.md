@@ -41,8 +41,12 @@ On native Windows, skip the setup script and run the two install commands from P
 ```powershell
 git clone <repository-url> autocode-flightdeck
 cd autocode-flightdeck
-(cd backend && uv sync --all-extras)
-(cd frontend && npm ci)
+cd backend
+uv sync --all-extras
+cd ..
+cd frontend
+npm ci
+cd ..
 ```
 
 See [docs/installation.md](docs/installation.md) for tool installation, versions and troubleshooting.
@@ -71,7 +75,7 @@ Open `http://localhost:5173` in a browser. To check the backend on its own, open
 
 ### Windows
 
-Run the same two commands from PowerShell, in two separate terminals:
+Run the same two commands from PowerShell, in two separate terminals. Each terminal starts in the repository root:
 
 ```powershell
 cd backend
