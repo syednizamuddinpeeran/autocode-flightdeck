@@ -199,3 +199,78 @@ def test_readme_links_docs() -> None:
 def test_readme_local_use_only() -> None:
     assert README.is_file(), "README.md missing at repo root"
     assert "local use only" in _read(README).lower()
+
+
+LOCAL_HOSTS = {"localhost", "127.0.0.1"}
+ALLOWED_EXTERNAL_HOSTS = {"docs.astral.sh"}
+
+
+def _readme_code_lines(text: str) -> list[str]:
+    blocks = re.findall(r"^```[\w-]*\n(.*?)^```", text, re.M | re.S)
+    lines = [line.strip() for block in blocks for line in block.splitlines()]
+    return [line for line in lines if line and not line.startswith("#")]
+
+
+def _check_readme_command(line: str, state: dict[str, str]) -> None:
+    scripts = json.loads(_read(ROOT / "frontend" / "package.json"))["scripts"]
+    setup = re.search(r'^SETUP_CMD="(.*)"$', _read(FACTORY / "commands.env"), re.M)
+    assert setup, "SETUP_CMD not found in commands.env"
+    subshell = re.fullmatch(r"\(cd (\S+) && (.+)\)", line)
+    if subshell:
+        assert (ROOT / subshell.group(1)).is_dir(), f"README: no directory in {line!r}"
+        line = subshell.group(2)
+    if clone := re.fullmatch(r"git clone <repository-url> (\S+)", line):
+        state["clone"] = clone.group(1)
+    elif cd := re.fullmatch(r"cd (\S+)", line):
+        target = cd.group(1)
+        ok = target in {"..", state.get("clone", "")} or (ROOT / target).is_dir()
+        assert ok, f"README: cd target not found: {line!r}"
+    elif script := re.fullmatch(r"bash (scripts/factory/[\w.-]+\.sh)", line):
+        assert (ROOT / script.group(1)).is_file(), f"README: missing script {line!r}"
+    elif npm := re.fullmatch(r"npm run ([a-z][a-z:-]*)", line):
+        assert npm.group(1) in scripts, f"README: npm script missing: {line!r}"
+    elif line in {"npm ci", "uv sync --all-extras"}:
+        assert line in setup.group(1), f"README: {line!r} not in SETUP_CMD"
+    elif line == "uv run python -m flightdeck.main":
+        assert '__name__ == "__main__"' in _read(MAIN_PY)
+    else:
+        pytest.fail(f"README: command not tied to a source: {line!r}")
+
+
+def test_readme_commands_and_urls_match_code() -> None:
+    text = _read(README)
+    host, port = _main_constants()
+    routes = {_norm_route(path) for path in app.openapi()["paths"]}
+
+    state: dict[str, str] = {}
+    for line in _readme_code_lines(text):
+        _check_readme_command(line, state)
+
+    setup_sh = _read(FACTORY / "setup.sh")
+    for tool in re.findall(r"needs `(\w+)` and `(\w+)`", text)[0]:
+        assert re.search(rf"\b{tool}\b", setup_sh), f"setup.sh does not use {tool}"
+
+    urls = re.findall(r"https?://[^\s)`'\"<>]+", text)
+    assert urls, "no URLs found in README"
+    seen_health = False
+    for url in urls:
+        match = re.fullmatch(r"(https?)://([^/:]+)(?::(\d+))?(/[^\s]*)?", url)
+        assert match, f"README: unparseable URL {url!r}"
+        scheme, url_host, url_port, path = match.groups()
+        if url_host in LOCAL_HOSTS:
+            assert url_port in {port, VITE_DEFAULT_PORT}, f"README: unexpected port in {url}"
+            if url_port == port:
+                assert url_host == host, f"README: backend host differs from DEFAULT_HOST: {url}"
+        else:
+            assert scheme == "https", f"README: non-https external URL {url}"
+            assert url_host in ALLOWED_EXTERNAL_HOSTS, f"README: unexpected host in {url}"
+        if path and path.startswith("/api/"):
+            assert _norm_route(path) in routes, f"README: no route for {path}"
+            seen_health = seen_health or path == "/api/health"
+    assert seen_health, "README does not mention /api/health"
+
+    for pattern in PERSONAL_PATHS:
+        for name in pattern.findall(text):
+            assert name.startswith("<") and name.endswith(">"), f"personal path {name!r}"
+    for secret in SECRET_PATTERNS:
+        assert not secret.search(text), f"README matches {secret.pattern}"
