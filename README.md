@@ -21,21 +21,69 @@ See [docs/installation.md](docs/installation.md) for versions and details.
 
 ### WSL/Linux
 
-Install the backend and frontend dependencies as described in [docs/installation.md](docs/installation.md).
+```bash
+git clone <repository-url> autocode-flightdeck
+cd autocode-flightdeck
+bash scripts/factory/setup.sh
+```
+
+The setup script needs `git` and `jq`. It is equivalent to running the two install commands yourself:
+
+```bash
+(cd backend && uv sync --all-extras)
+(cd frontend && npm ci)
+```
 
 ### Windows
 
-Follow the native Windows steps in [docs/installation.md](docs/installation.md).
+On native Windows, skip the setup script and run the two install commands from PowerShell:
+
+```powershell
+git clone <repository-url> autocode-flightdeck
+cd autocode-flightdeck
+(cd backend && uv sync --all-extras)
+(cd frontend && npm ci)
+```
+
+See [docs/installation.md](docs/installation.md) for tool installation, versions and troubleshooting.
 
 ## Quick start
 
+Start the backend and the frontend in two separate terminals. The commands are the same on WSL/Linux and Windows.
+
 ### WSL/Linux
 
-Start the backend and frontend as described in [docs/usage.md](docs/usage.md).
+Backend:
+
+```bash
+cd backend
+uv run python -m flightdeck.main
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Open `http://localhost:5173` in a browser. To check the backend on its own, open `http://127.0.0.1:8000/api/health`.
 
 ### Windows
 
-Follow the native Windows steps in [docs/usage.md](docs/usage.md).
+Run the same two commands from PowerShell, in two separate terminals:
+
+```powershell
+cd backend
+uv run python -m flightdeck.main
+```
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Open `http://localhost:5173` in a browser. See [docs/usage.md](docs/usage.md) for using the UI.
 
 ## Documentation
 
